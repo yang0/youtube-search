@@ -1,0 +1,13 @@
+{
+  "name": "youtube-search",
+  "version": "1.0.0",
+  "description": "独立 YouTube 搜索、评论提取、头像下载 skill。可部署到任何目录。",
+  "type": "module",
+  "scripts": {
+    "search": "bun scripts/search_videos.js",
+    "comments": "bun scripts/extract_comments.js",
+    "avatars": "bun scripts/download_avatars.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
