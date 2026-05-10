@@ -1,11 +1,78 @@
 ---
 name: youtube-search
-description: "独立 YouTube 搜索、评论提取、头像下载工具套件。可在任何目录下执行，通过 --output-dir 控制存储落点。"
+description: "独立 YouTube 搜索、评论提取、头像下载工具套件。内置关键词拓展策略（格式维度×角度维度×热度维度），支持迭代精炼搜索。通过 --output-dir 控制存储落点。"
 ---
 
 # YouTube Search - 搜索 / 评论 / 头像
 
 独立、可移植的 YouTube 数据提取工具。不依赖特定目录结构，通过 `--output-dir` 参数确定数据落点。
+
+## 搜索策略（编排者必读）
+
+> **本 skill 的脚本只做执行，不做判断。搜索关键词的确定、扩展、精炼是编排者（你）的职责。**
+
+### 原则：不要拿到用户的一句话就直接搜
+
+用户的原始表述往往是"一个想法"，不是"一组搜索词"。编排者需要：
+
+1. **理解真实意图** — "找人类学视频" 可能意味着教学讲座、田野调查 Vlog、纪录片、或学术讨论，搜索结果天差地别
+2. **拓展关键词** — 1-2 个种子词 → 5-8 个多角度查询
+3. **选择格式策略** — 匹配用户想看的内容形式
+4. **迭代精炼** — 搜一轮 → 看结果 → 问用户方向对不对 → 调整再搜
+
+### 关键词拓展方法论
+
+拿到用户的种子词后，不要直接搜。按以下维度扩展：
+
+**1. 格式维度（用户想看什么形式？）**
+
+| 格式 | 查询模板 | 适用场景 |
+|------|---------|---------|
+| Vlog/沉浸式 | `{topic} day in the life`, `living with {topic}` | 人类学田野调查、创业日常 |
+| 纪录片 | `{topic} documentary`, `{topic} full episode` | 深度内容、历史回顾 |
+| 教程/课程 | `{topic} tutorial`, `{topic} full course`, `introduction to {topic}` | 技能学习 |
+| 案例/实操 | `{topic} case study`, `how I built {topic}`, `{topic} real results` | 商业分析 |
+| 解释/科普 | `{topic} explained`, `what is {topic}` | 概念入门 |
+
+**2. 角度维度（从什么视角切入？）**
+
+```
+种子词: "AI 创业"
+├─ 按人群: "AI startup founder", "AI solopreneur"
+├─ 按阶段: "AI business ideas", "scaling AI company"
+├─ 按收入: "make money with AI", "AI business revenue"
+├─ 按工具: "AI automation agency", "build AI agents"
+└─ 按地域: "AI startup silicon valley", "AI business asia"
+```
+
+**3. 热度维度（怎样找到流量最高的内容？）**
+
+- 先用宽泛词探测：`{topic}` 不加修饰，看 YouTube 返回什么 title pattern
+- 从高观看视频的标题中提取高频短语，作为下一轮精炼查询
+- 例如：搜 "anthropology" 发现 "anthropology documentary" 的视频观看量是纯 "anthropology" 的 10 倍
+
+### 迭代对话模板
+
+```
+编排者: "你要找的「人类学视频」，更偏向哪种？
+         (a) 沉浸式田野调查 Vlog — 跟部落同吃同住那种
+         (b) 学术讲座/课程 — 系统学人类学知识
+         (c) 纪录片 — 历史文化深度内容
+         (d) 都看看，帮我挑"
+
+用户选择后 → 按对应格式维度扩展查询 → 执行搜索 → 展示结果
+
+编排者: "搜到 X 条结果。前 3 名是 [标题+观看量]。
+         这个方向对吗？要不要换个角度再搜？"
+```
+
+### 默认扩展策略
+
+如果用户没给明确格式偏好，默认生成两套查询同时搜：
+- **宽泛探测**（2-3 个）: `{topic}`, `{topic} documentary`, `{topic} explained`  
+- **格式覆盖**（3-4 个）: 从 Vlog/教程/案例中各取一个角度
+
+然后将两类结果并列展示，让用户选择深入方向。
 
 ## 存储 Schema（重要）
 
